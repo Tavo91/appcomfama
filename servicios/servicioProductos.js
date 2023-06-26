@@ -1,89 +1,84 @@
-const sequelize = require('../libs/sequelize')
+const { matchedData } = require("express-validator");
+const sequelize = require("../libs/sequelize");
+const { models } = require("../libs/sequelize");
 
-
-
-const getAllProductos = async (req, res)=>{
+const getAllProductos = async () => {
     try {
-        const query = 'SELECT * FROM tasks'
-        const [data] = await sequelize.query(query)
-        return  {data}
+      const data = await models.Product.findAll({
+       
+      })
+      return {
+        data
+      }
     } catch (error) {
-        console.log(error)
+      console.log(error)
     }
-
-}
-
-
-
-const crearNuevoProducto = (req, res)=>{
- try {
-    const body = req.body
-    console.log(body)
-    res.json({
-        ok:true,
-        data: body
-    })
-    
- } catch (error) {
-    console.log(error)
-    
- }
-}
-
-
-const actualizarProducto = (req, res)=>{
-  try {
-    const { id } = req.params;
-    if(id !=1){
-        throw boom.notFound('producto no encontrado')
-    }
-    const body = req.body;
-    res.json({
-            message:'Producto Actualizado',
-            producto: body,
-             id,
-            
-        });
-  } catch (error) {
-    console.log(error)
-    
+  
   }
-}
 
-
-const eliminarProducto = (req, res)=>{
+  const crearNuevoProducto = async (body) =>{
     try {
-        const { id } = req.params;
-    res.json({
-            message:'Producto Eliminado',
-            id,
-            
-        });
+     console.log(body)
+     const newCategory = await models.Product.create(body)
+     return newCategory
     } catch (error) {
-        console.log(error)
+     console.log(error)
     }
-}
+   
+   }
 
 
-const getOneProducto = (req, res)=>{
+   const actualizarProducto = async (id, body) =>{
     try {
-        const { id } = req.params;
-    res.json({
-      id: id,
-      nombre: "teclado",
-      precio: 2000,
-      categoria: "tecnologia",
-    });
+      const category = await models.Product.findByPk(id)
+      if (!category) {
+        return {
+          error: 'category not found'
+        }
+      }
+      const response = await category.update(body)
+      return response
     } catch (error) {
-        console.log(error)
+      console.log(error)
     }
-}
+  }
+  
 
+
+
+const eliminarProducto = async (id) => {
+    try {
+     const category = await models.Product.findByPk(id)
+     await category.destroy()
+     return {
+       message: 'producto eliminado',
+       id
+     }
+    } catch (error) {
+     console.log(error)
+    }
+   }
+
+
+const getOneProducto = async (id) => {
+    try {
+     const product = await models.Product.findByPk(id)
+     if(!product){
+       return {
+         message: 'product not found'
+       }
+     }
+     return product
+    } catch (error) {
+     console.log(error)
+    }
+   }
+   
 
 module.exports = {
-    getAllProductos,
-    crearNuevoProducto,
-    actualizarProducto,
-    eliminarProducto,
-    getOneProducto
-}
+  getAllProductos,
+  crearNuevoProducto,
+  actualizarProducto,
+  eliminarProducto,
+  getOneProducto,
+};
